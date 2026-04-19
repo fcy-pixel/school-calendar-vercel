@@ -425,7 +425,10 @@ export default function Home() {
       {/* ── Main content ── */}
       <main className="main-content">
         <div className="page-header">
-          <h1>📅 中華基督教會基慈小學 智慧校曆系統</h1>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <img src="/logo.png" alt="基慈小學" style={{ width: 48, height: 48 }} />
+            <h1>中華基督教會基慈小學 智慧校曆系統</h1>
+          </div>
           <span className="sync-badge">✓ 即時同步中</span>
         </div>
 
