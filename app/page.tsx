@@ -51,8 +51,9 @@ export default function Home() {
 
   // Sidebar sections toggle
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
-    manual: true,
-    ai: true,
+    import: false,
+    manual: false,
+    ai: false,
     export: false,
   });
 
