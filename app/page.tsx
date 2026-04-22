@@ -57,6 +57,9 @@ export default function Home() {
     export: false,
   });
 
+  // Sidebar 整體收合（方便廣告機/電視全畫面顯示）
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
   // Manual form
   const [mTitle, setMTitle] = useState("");
   const [mDate, setMDate] = useState(toDateStr(new Date()));
@@ -314,8 +317,20 @@ export default function Home() {
       )}
 
       {/* ── Sidebar ── */}
+      {!sidebarCollapsed && (
       <aside className="sidebar">
-        <h2>⚙️ 設定與操作</h2>
+        <div className="sidebar-title-row">
+          <h2>⚙️ 設定與操作</h2>
+          <button
+            type="button"
+            className="sidebar-collapse-btn"
+            onClick={() => setSidebarCollapsed(true)}
+            title="收起側邊欄"
+            aria-label="收起側邊欄"
+          >
+            ◀
+          </button>
+        </div>
 
         {/* Import */}
         <div className="sidebar-section">
@@ -422,6 +437,19 @@ export default function Home() {
           )}
         </div>
       </aside>
+      )}
+
+      {sidebarCollapsed && (
+        <button
+          type="button"
+          className="sidebar-expand-btn"
+          onClick={() => setSidebarCollapsed(false)}
+          title="展開側邊欄"
+          aria-label="展開側邊欄"
+        >
+          ⚙️ ▶
+        </button>
+      )}
 
       {/* ── Main content ── */}
       <main className="main-content">
