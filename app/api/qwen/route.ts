@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+export const runtime = "edge";
+
 export async function POST(req: NextRequest) {
   const { text } = await req.json();
   const apiKey = process.env.QWEN_API_KEY;
