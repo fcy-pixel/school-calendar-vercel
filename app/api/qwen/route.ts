@@ -13,12 +13,28 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid input" }, { status: 400 });
   }
 
-  const today = new Date();
+  // 以香港時區取得「今天」，避免 Edge runtime 預設 UTC 造成日期偏差
+  const TZ = "Asia/Hong_Kong";
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: TZ,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    weekday: "short",
+  }).formatToParts(new Date());
+  const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "";
+  const yyyy = get("year");
+  const mm = get("month");
+  const dd = get("day");
+  const isoToday = `${yyyy}-${mm}-${dd}`; // YYYY-MM-DD (HKT)
+  // 用 HKT 的日期字串建立 Date 以取得正確星期
   const weekdays = ["日", "一", "二", "三", "四", "五", "六"];
-  const todayStr = `${today.getFullYear()}年${today.getMonth() + 1}月${today.getDate()}日（星期${weekdays[today.getDay()]}）`;
+  const weekday = weekdays[new Date(`${isoToday}T00:00:00+08:00`).getUTCDay()];
+  const todayStr = `${yyyy}年${Number(mm)}月${Number(dd)}日（星期${weekday}）`;
 
   const systemPrompt =
-    `你是一個學校校曆助手。今天是 ${todayStr}。\n` +
+    `你是一個學校校曆助手。今天是 ${todayStr}（ISO: ${isoToday}，時區 Asia/Hong_Kong）。\n` +
+    `所有相對日期（今天/明天/後天/下週X 等）一律以上述香港時區為準。\n` +
     `請從自然語言中提取事件信息，只返回純JSON（不要加markdown代碼塊），格式：\n` +
     `{"title":"活動名稱","date":"YYYY-MM-DD","time":"HH:MM","end_date":"YYYY-MM-DD","description":""}\n` +
     `time 和 end_date 可省略，date 必填。`;

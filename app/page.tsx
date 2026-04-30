@@ -25,7 +25,11 @@ function formatDate(d: Date) {
 }
 
 function toDateStr(d: Date) {
-  return d.toISOString().slice(0, 10);
+  // 使用本地時區（而非 UTC）輸出 YYYY-MM-DD，避免 toISOString() 造成跨日偏差
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
 }
 
 function getEventsForDate(target: string, events: CalendarEvent[]) {
