@@ -10,7 +10,7 @@ import { useEffect, useState, useCallback } from "react";
 
 const ALLOWED_DOMAIN = "keitsz.edu.hk";
 const STORAGE_KEY = "ksz_auth_v1";
-const SESSION_DAYS = 30;
+const SESSION_DAYS = 90;
 
 declare global {
   interface Window {
@@ -350,7 +350,7 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
             lineHeight: 1.6,
           }}
         >
-          登入後 30 天內不需重新驗證
+          登入後 90 天內不需重新驗證
           <br />
           系統只讀取你的姓名與電郵，不會寫入 Google 帳號
         </p>
