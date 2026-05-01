@@ -5,7 +5,8 @@ import { useEffect, useState, useCallback } from "react";
 /**
  * Google Identity Services 登入閘門
  * 限制：只允許 hosted domain (hd) 為 ALLOWED_DOMAIN 的 Google 帳號通過
- * 通過後 token 存於 cookie，預設 90 天免重新登入（清快取不登出）
+ * 通過後 token 同時存於 cookie 及 localStorage，90 天免重新登入
+ * 雙重儲存：清快取不登出（cookie），換裝置前的備援（localStorage）
  */
 
 function getCookieValue(name: string): string | null {
@@ -23,6 +24,25 @@ function setCookieValue(name: string, value: string, days: number) {
 
 function deleteCookieValue(name: string) {
   document.cookie = `${name}=; path=/; max-age=0; SameSite=Lax`;
+}
+
+function saveAuth(key: string, value: string, days: number) {
+  try { setCookieValue(key, value, days); } catch {}
+  try { localStorage.setItem(key, value); } catch {}
+}
+
+function loadAuth(key: string): string | null {
+  try {
+    const v = getCookieValue(key);
+    if (v) return v;
+  } catch {}
+  try { return localStorage.getItem(key); } catch {}
+  return null;
+}
+
+function clearAuth(key: string) {
+  try { deleteCookieValue(key); } catch {}
+  try { localStorage.removeItem(key); } catch {}
 }
 
 const ALLOWED_DOMAIN = "keitsz.edu.hk";
@@ -67,16 +87,16 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
 
   const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
-  // 1) 啟動：讀取 cookie 已存的登入
+  // 1) 啟動：從 cookie 或 localStorage 讀取已存的登入
   useEffect(() => {
     try {
-      const raw = getCookieValue(STORAGE_KEY);
+      const raw = loadAuth(STORAGE_KEY);
       if (raw) {
         const info: AuthInfo = JSON.parse(raw);
         if (info.exp > Date.now() && info.hd === ALLOWED_DOMAIN) {
           setAuth(info);
         } else {
-          deleteCookieValue(STORAGE_KEY);
+          clearAuth(STORAGE_KEY);
         }
       }
     } catch {}
@@ -124,7 +144,7 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
       hd,
       exp: Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000,
     };
-    setCookieValue(STORAGE_KEY, JSON.stringify(info), SESSION_DAYS);
+    saveAuth(STORAGE_KEY, JSON.stringify(info), SESSION_DAYS);
     setAuth(info);
     setError(null);
   }, []);
@@ -163,7 +183,7 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
   }, [scriptLoaded, clientId, auth, handleCredential]);
 
   const signOut = () => {
-    deleteCookieValue(STORAGE_KEY);
+    clearAuth(STORAGE_KEY);
     setAuth(null);
     setError(null);
     try {
