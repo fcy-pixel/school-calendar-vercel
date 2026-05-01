@@ -5,8 +5,25 @@ import { useEffect, useState, useCallback } from "react";
 /**
  * Google Identity Services 登入閘門
  * 限制：只允許 hosted domain (hd) 為 ALLOWED_DOMAIN 的 Google 帳號通過
- * 通過後 token 存於 localStorage，預設 30 天免重新登入
+ * 通過後 token 存於 cookie，預設 90 天免重新登入（清快取不登出）
  */
+
+function getCookieValue(name: string): string | null {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match(
+    new RegExp("(?:^|;\\s*)" + name + "=([^;]*)")
+  );
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+function setCookieValue(name: string, value: string, days: number) {
+  const maxAge = days * 24 * 60 * 60;
+  document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${maxAge}; SameSite=Lax`;
+}
+
+function deleteCookieValue(name: string) {
+  document.cookie = `${name}=; path=/; max-age=0; SameSite=Lax`;
+}
 
 const ALLOWED_DOMAIN = "keitsz.edu.hk";
 const STORAGE_KEY = "ksz_auth_v1";
@@ -50,16 +67,16 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
 
   const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
-  // 1) 啟動：讀取 localStorage 已存的登入
+  // 1) 啟動：讀取 cookie 已存的登入
   useEffect(() => {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      const raw = getCookieValue(STORAGE_KEY);
       if (raw) {
         const info: AuthInfo = JSON.parse(raw);
         if (info.exp > Date.now() && info.hd === ALLOWED_DOMAIN) {
           setAuth(info);
         } else {
-          localStorage.removeItem(STORAGE_KEY);
+          deleteCookieValue(STORAGE_KEY);
         }
       }
     } catch {}
@@ -107,7 +124,7 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
       hd,
       exp: Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000,
     };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(info));
+    setCookieValue(STORAGE_KEY, JSON.stringify(info), SESSION_DAYS);
     setAuth(info);
     setError(null);
   }, []);
@@ -146,7 +163,7 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
   }, [scriptLoaded, clientId, auth, handleCredential]);
 
   const signOut = () => {
-    localStorage.removeItem(STORAGE_KEY);
+    deleteCookieValue(STORAGE_KEY);
     setAuth(null);
     setError(null);
     try {
