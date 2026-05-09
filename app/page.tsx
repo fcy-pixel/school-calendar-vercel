@@ -173,14 +173,18 @@ export default function Home() {
         throw new Error(err.error || "AI request failed");
       }
       const result = await res.json();
+      const aiCategory =
+        result.event_type === "school" ? "AI-學校事件" :
+        result.event_type === "teacher_training" ? "AI-老師進修" :
+        "AI新增";
       const ev: CalendarEvent = {
         id: `ai${Date.now()}`,
         title: result.title || aiText.trim(),
         start: result.time
           ? `${result.date}T${result.time}:00`
           : result.date || toDateStr(new Date()),
-        color: CATEGORY_COLORS["AI新增"],
-        category: "AI新增",
+        color: CATEGORY_COLORS[aiCategory],
+        category: aiCategory,
         description: result.description || "",
       };
       if (result.end_date && result.end_date !== result.date) {

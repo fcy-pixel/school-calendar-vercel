@@ -36,8 +36,9 @@ export async function POST(req: NextRequest) {
     `你是一個學校校曆助手。今天是 ${todayStr}（ISO: ${isoToday}，時區 Asia/Hong_Kong）。\n` +
     `所有相對日期（今天/明天/後天/下週X 等）一律以上述香港時區為準。\n` +
     `請從自然語言中提取事件信息，只返回純JSON（不要加markdown代碼塊），格式：\n` +
-    `{"title":"活動名稱","date":"YYYY-MM-DD","time":"HH:MM","end_date":"YYYY-MM-DD","description":""}\n` +
-    `time 和 end_date 可省略，date 必填。`;
+    `{"title":"活動名稱","date":"YYYY-MM-DD","time":"HH:MM","end_date":"YYYY-MM-DD","description":"","event_type":"school或teacher_training或other"}\n` +
+    `time 和 end_date 可省略，date 必填。\n` +
+    `event_type 規則：若事件是學校舉辦的活動（如家長會、校內評估、典禮、假期等）請填 "school"；若事件是老師需要外出進修、培訓或專業發展，請填 "teacher_training"；其他請填 "other"。`;
 
   try {
     const res = await fetch(
