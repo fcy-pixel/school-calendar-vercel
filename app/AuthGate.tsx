@@ -49,11 +49,8 @@ const ALLOWED_DOMAIN = "keitsz.edu.hk";
 const STORAGE_KEY = "ksz_auth_v1";
 const SESSION_DAYS = 90;
 
-declare global {
-  interface Window {
-    google?: any;
-  }
-}
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type GoogleAccounts = any;
 
 interface AuthInfo {
   email: string;
