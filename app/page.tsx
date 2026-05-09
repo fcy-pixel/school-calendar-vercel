@@ -173,10 +173,14 @@ export default function Home() {
         throw new Error(err.error || "AI request failed");
       }
       const result = await res.json();
-      const aiCategory =
-        result.event_type === "school" ? "AI-學校事件" :
-        result.event_type === "teacher_training" ? "AI-老師進修" :
-        "AI新增";
+      const teacherKeywords = ["進修", "培訓", "研習", "工作坊", "專業發展", "teacher training"];
+      const combinedText = (result.title || "") + aiText;
+      const isTeacherTraining =
+        result.event_type === "teacher_training" ||
+        teacherKeywords.some(kw => combinedText.includes(kw));
+      const aiCategory = isTeacherTraining
+        ? "AI-老師進修"
+        : result.event_type === "school" ? "AI-學校事件" : "AI新增";
       const ev: CalendarEvent = {
         id: `ai${Date.now()}`,
         title: result.title || aiText.trim(),
