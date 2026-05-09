@@ -17,12 +17,12 @@ export const CATEGORY_COLORS: Record<string, string> = {
   "會議":    "#1abc9c",
   "校務":    "#7f8c8d",
   "課外活動": "#f39c12",
-  "AI新增":  "#8e44ad",
-  "AI-學校事件": "#9b59b6",
-  "AI-老師進修": "#f1c40f",
+  "新增":  "#8e44ad",
+  "學校事件": "#9b59b6",
+  "老師進修": "#f1c40f",
 };
 
-export const CATEGORIES = Object.keys(CATEGORY_COLORS).filter(c => !c.startsWith("AI"));
+export const CATEGORIES = Object.keys(CATEGORY_COLORS).filter(c => c !== "新增" && c !== "學校事件" && c !== "老師進修");
 
 export const PRELOADED_EVENTS: CalendarEvent[] = [
   { id: "p01", title: "元宵節", start: "2026-03-03", color: "#e74c3c", category: "假期" },

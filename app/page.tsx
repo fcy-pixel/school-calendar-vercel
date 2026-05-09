@@ -179,8 +179,8 @@ export default function Home() {
         result.event_type === "teacher_training" ||
         teacherKeywords.some(kw => combinedText.includes(kw));
       const aiCategory = isTeacherTraining
-        ? "AI-老師進修"
-        : result.event_type === "school" ? "AI-學校事件" : "AI新增";
+        ? "老師進修"
+        : result.event_type === "school" ? "學校事件" : "新增";
       const ev: CalendarEvent = {
         id: `ai${Date.now()}`,
         title: result.title || aiText.trim(),
