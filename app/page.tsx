@@ -192,7 +192,10 @@ export default function Home() {
         description: result.description || "",
       };
       if (result.end_date && result.end_date !== result.date) {
-        ev.end = result.end_date;
+        // FullCalendar end is exclusive for all-day events, so +1 day
+        const endD = new Date(result.end_date + "T00:00:00");
+        endD.setDate(endD.getDate() + 1);
+        ev.end = toDateStr(endD);
       }
       const next = [...events, ev];
       setEvents(next);
