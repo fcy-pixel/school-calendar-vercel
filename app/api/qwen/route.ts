@@ -37,8 +37,11 @@ export async function POST(req: NextRequest) {
     `所有相對日期（今天/明天/後天/下週X 等）一律以上述香港時區為準。\n` +
     `請從自然語言中提取事件信息，只返回純JSON（不要加markdown代碼塊），格式：\n` +
     `{"title":"活動名稱","date":"YYYY-MM-DD","time":"HH:MM","end_date":"YYYY-MM-DD","description":"","event_type":"school或teacher_training或other"}\n` +
-    `time 和 end_date 可省略，date 必填。\n` +
-    `event_type 規則：若事件是學校舉辦的活動（如家長會、校內評估、典禮、假期等）請填 "school"；若事件是老師需要外出進修、培訓或專業發展，請填 "teacher_training"；其他請填 "other"。`;
+    `time 和 end_date 可省略，date 必填，event_type 必填。\n` +
+    `event_type 判斷規則（優先級由高到低）：\n` +
+    `1. 若事件涉及老師/教師/教職員 外出、進修、培訓、研習、工作坊、專業發展，一律填 "teacher_training"。關鍵詞：進修、培訓、研習、工作坊、外出（指老師）、專業發展、teacher training。\n` +
+    `2. 若事件是學校為學生/家長舉辦的活動（如家長會、校內評估、典禮、假期、旅行、比賽等），填 "school"。\n` +
+    `3. 其他填 "other"。`;
 
   try {
     const res = await fetch(
