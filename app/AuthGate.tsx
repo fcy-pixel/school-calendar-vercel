@@ -309,7 +309,7 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
         >
           中華基督教會基慈小學
         </h1>
-        <p style={{ color: "#475569", marginBottom: 4 }}>智慧校曆系統</p>
+        <p style={{ color: "#475569", marginBottom: 4 }}>智慧校曆</p>
         <p style={{ color: "#94a3b8", fontSize: 13, marginBottom: 22 }}>
           請使用 <b style={{ color: "#4f46e5" }}>@{ALLOWED_DOMAIN}</b>{" "}
           帳號登入
