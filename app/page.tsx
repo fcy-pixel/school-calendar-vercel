@@ -18,6 +18,16 @@ import {
 const FB_COLLECTION = "school_calendar";
 const FB_DOCUMENT = "events";
 
+// AI 解析後的單一事件（由 /api/qwen 回傳）
+interface AIEvent {
+  title?: string;
+  date?: string;
+  time?: string;
+  end_date?: string;
+  description?: string;
+  event_type?: string;
+}
+
 const WEEKDAYS = ["日", "一", "二", "三", "四", "五", "六"];
 
 function formatDate(d: Date) {
@@ -173,35 +183,58 @@ export default function Home() {
         throw new Error(err.error || "AI request failed");
       }
       const result = await res.json();
-      const teacherKeywords = ["進修", "培訓", "研習", "工作坊", "專業發展", "teacher training"];
-      const combinedText = (result.title || "") + aiText;
-      const isTeacherTraining =
-        result.event_type === "teacher_training" ||
-        teacherKeywords.some(kw => combinedText.includes(kw));
-      const aiCategory = isTeacherTraining
-        ? "老師進修"
-        : result.event_type === "school" ? "學校事件" : "新增";
-      const ev: CalendarEvent = {
-        id: `ai${Date.now()}`,
-        title: result.title || aiText.trim(),
-        start: result.time
-          ? `${result.date}T${result.time}:00`
-          : result.date || toDateStr(new Date()),
-        color: CATEGORY_COLORS[aiCategory],
-        category: aiCategory,
-        description: result.description || "",
-      };
-      if (result.end_date && result.end_date !== result.date) {
-        // FullCalendar end is exclusive for all-day events, so +1 day
-        const endD = new Date(result.end_date + "T00:00:00");
-        endD.setDate(endD.getDate() + 1);
-        ev.end = toDateStr(endD);
+      // API 統一回傳 { events: [...] }；亦相容舊有單一物件格式
+      const items: AIEvent[] = Array.isArray(result?.events)
+        ? result.events
+        : result?.date
+        ? [result]
+        : [];
+
+      if (items.length === 0) {
+        throw new Error("找不到任何活動，請換個說法再試");
       }
-      const next = [...events, ev];
+
+      const teacherKeywords = ["進修", "培訓", "研習", "工作坊", "專業發展", "teacher training"];
+      const baseId = Date.now();
+      const newEvents: CalendarEvent[] = items.map((item, i) => {
+        // 逐一判斷分類：老師進修 / 學校事件 / 新增
+        const combinedText = (item.title || "") + aiText;
+        const isTeacherTraining =
+          item.event_type === "teacher_training" ||
+          teacherKeywords.some((kw) => combinedText.includes(kw));
+        const aiCategory = isTeacherTraining
+          ? "老師進修"
+          : item.event_type === "school"
+          ? "學校事件"
+          : "新增";
+        const ev: CalendarEvent = {
+          id: `ai${baseId}_${i}`,
+          title: item.title || aiText.trim(),
+          start: item.time
+            ? `${item.date}T${item.time}:00`
+            : item.date || toDateStr(new Date()),
+          color: CATEGORY_COLORS[aiCategory],
+          category: aiCategory,
+          description: item.description || "",
+        };
+        if (item.end_date && item.end_date !== item.date) {
+          // FullCalendar end is exclusive for all-day events, so +1 day
+          const endD = new Date(item.end_date + "T00:00:00");
+          endD.setDate(endD.getDate() + 1);
+          ev.end = toDateStr(endD);
+        }
+        return ev;
+      });
+
+      const next = [...events, ...newEvents];
       setEvents(next);
       saveEvents(next);
       setAiText("");
-      showToast(`✅ 已新增：${ev.title}（${result.date || ""}）`);
+      if (newEvents.length === 1) {
+        showToast(`✅ 已新增：${newEvents[0].title}（${items[0].date || ""}）`);
+      } else {
+        showToast(`✅ 已新增 ${newEvents.length} 個活動`);
+      }
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "解析失敗";
       showToast(`❌ ${msg}`, true);
@@ -418,12 +451,14 @@ export default function Home() {
           {openSections.ai && (
             <div className="sidebar-section-body">
               <p style={{ fontSize: "0.8rem", color: "#999" }}>
-                例如：「下週三早上9點六年級家長會」
+                可一次輸入多個事件／多個日期，AI 會自動分開新增。例如：
+                「下週三早上9點六年級家長會；3月20日至22日學校旅行；下星期五全校大掃除」
               </p>
               <textarea
                 value={aiText}
                 onChange={(e) => setAiText(e.target.value)}
-                placeholder="自然語言輸入"
+                placeholder="自然語言輸入（可貼上一整段，包含多個事件與日期）"
+                rows={5}
               />
               <button
                 className="btn btn-primary"
