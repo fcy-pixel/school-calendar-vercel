@@ -19,10 +19,29 @@ export const CATEGORY_COLORS: Record<string, string> = {
   "課外活動": "#f39c12",
   "新增":  "#8e44ad",
   "學校事件": "#9b59b6",
-  "老師進修": "#f1c40f",
+  "學生事件": "#9b59b6",
 };
 
-export const CATEGORIES = Object.keys(CATEGORY_COLORS).filter(c => c !== "新增" && c !== "學校事件" && c !== "老師進修");
+export const CATEGORIES = Object.keys(CATEGORY_COLORS).filter(c => c !== "新增" && c !== "學校事件" && c !== "學生事件");
+
+// 舊分類遷移：黃色「老師進修」一律改為紫色「學校事件」
+const LEGACY_CATEGORY_MAP: Record<string, string> = {
+  "老師進修": "學校事件",
+};
+
+export function normalizeEvents(evts: CalendarEvent[]): { events: CalendarEvent[]; changed: boolean } {
+  let changed = false;
+  const events = evts.map((ev) => {
+    const mapped = LEGACY_CATEGORY_MAP[ev.category];
+    if (mapped || ev.color === "#f1c40f") {
+      changed = true;
+      const category = mapped || "學校事件";
+      return { ...ev, category, color: CATEGORY_COLORS[category] };
+    }
+    return ev;
+  });
+  return { events, changed };
+}
 
 export const PRELOADED_EVENTS: CalendarEvent[] = [
   { id: "p01", title: "元宵節", start: "2026-03-03", color: "#e74c3c", category: "假期" },

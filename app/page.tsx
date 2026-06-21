@@ -13,6 +13,7 @@ import {
   CATEGORY_COLORS,
   CATEGORIES,
   PRELOADED_EVENTS,
+  normalizeEvents,
 } from "@/lib/events";
 
 const FB_COLLECTION = "school_calendar";
@@ -117,7 +118,9 @@ export default function Home() {
       if (snap.exists()) {
         const data = snap.data().events as CalendarEvent[];
         if (data && data.length > 0) {
-          setEvents(data);
+          const { events: norm, changed } = normalizeEvents(data);
+          setEvents(norm);
+          if (changed) saveEvents(norm); // 一次性遷移舊「老師進修」事件並寫回
         } else {
           setEvents([...PRELOADED_EVENTS]);
           saveEvents([...PRELOADED_EVENTS]);
@@ -136,12 +139,39 @@ export default function Home() {
     const unsub = onSnapshot(ref, (snap) => {
       if (snap.exists()) {
         const data = snap.data().events as CalendarEvent[];
-        if (data) setEvents(data);
+        if (data) setEvents(normalizeEvents(data).events);
       }
     });
 
     return () => unsub();
   }, [saveEvents]);
+
+  // ── 自動跟隨「當天」 ──
+  // 此校曆常開於電視／廣告機，頁面可能連續開著多日。
+  // 定時偵測日期是否已跨到新的一天，若是則自動切換到當天、
+  // 並把日曆導航回今天，毋須人手點擊。
+  useEffect(() => {
+    let current = toDateStr(new Date());
+    const tick = () => {
+      const todayStr = toDateStr(new Date());
+      if (todayStr !== current) {
+        current = todayStr;
+        setSelectedDate(todayStr);
+        calRef.current?.getApi().today();
+      }
+    };
+    const id = setInterval(tick, 30 * 1000); // 每 30 秒檢查一次
+    const onVisible = () => {
+      if (!document.hidden) tick(); // 重新顯示分頁時立即檢查
+    };
+    window.addEventListener("focus", tick);
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      clearInterval(id);
+      window.removeEventListener("focus", tick);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, []);
 
   // ── Add event (manual) ──
   const handleManualAdd = () => {
@@ -197,13 +227,13 @@ export default function Home() {
       const teacherKeywords = ["進修", "培訓", "研習", "工作坊", "專業發展", "teacher training"];
       const baseId = Date.now();
       const newEvents: CalendarEvent[] = items.map((item, i) => {
-        // 逐一判斷分類：老師進修 / 學校事件 / 新增
+        // 逐一判斷分類：學生事件 / 學校事件 / 新增
         const combinedText = (item.title || "") + aiText;
         const isTeacherTraining =
           item.event_type === "teacher_training" ||
           teacherKeywords.some((kw) => combinedText.includes(kw));
         const aiCategory = isTeacherTraining
-          ? "老師進修"
+          ? "學生事件"
           : item.event_type === "school"
           ? "學校事件"
           : "新增";
