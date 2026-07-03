@@ -158,6 +158,11 @@ export default function Home() {
         current = todayStr;
         setSelectedDate(todayStr);
         calRef.current?.getApi().today();
+        // 跨日後重新載入整頁：確保「今天」高亮正確，同時自動取得最新部署版本。
+        // 先以 HEAD 請求確認網絡正常，離線時保持原頁（靠上面的頁內更新）。
+        fetch(window.location.href, { method: "HEAD", cache: "no-store" })
+          .then((r) => { if (r.ok) window.location.reload(); })
+          .catch(() => {});
       }
     };
     const id = setInterval(tick, 30 * 1000); // 每 30 秒檢查一次
