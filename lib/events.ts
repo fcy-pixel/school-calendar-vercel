@@ -20,9 +20,10 @@ export const CATEGORY_COLORS: Record<string, string> = {
   "新增":  "#8e44ad",
   "學校事件": "#9b59b6",
   "學生事件": "#9b59b6",
+  "郵件匯入": "#e91e63",
 };
 
-export const CATEGORIES = Object.keys(CATEGORY_COLORS).filter(c => c !== "新增" && c !== "學校事件" && c !== "學生事件");
+export const CATEGORIES = Object.keys(CATEGORY_COLORS).filter(c => c !== "新增" && c !== "學校事件" && c !== "學生事件" && c !== "郵件匯入");
 
 // 舊分類遷移：黃色「老師進修」一律改為紫色「學校事件」
 const LEGACY_CATEGORY_MAP: Record<string, string> = {
