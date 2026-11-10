@@ -8,11 +8,20 @@ export const metadata: Metadata = {
   icons: { icon: "/logo.png" },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="zh-Hant">
       <body>
-        <AuthGate>{children}</AuthGate>
+        {process.env.NODE_ENV === "development" &&
+        process.env.CALENDAR_UI_PREVIEW === "1" ? (
+          children
+        ) : (
+          <AuthGate>{children}</AuthGate>
+        )}
       </body>
     </html>
   );

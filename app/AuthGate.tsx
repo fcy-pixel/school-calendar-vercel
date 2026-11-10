@@ -12,7 +12,7 @@ import { useEffect, useState, useCallback } from "react";
 function getCookieValue(name: string): string | null {
   if (typeof document === "undefined") return null;
   const match = document.cookie.match(
-    new RegExp("(?:^|;\\s*)" + name + "=([^;]*)")
+    new RegExp("(?:^|;\\s*)" + name + "=([^;]*)"),
   );
   return match ? decodeURIComponent(match[1]) : null;
 }
@@ -27,8 +27,12 @@ function deleteCookieValue(name: string) {
 }
 
 function saveAuth(key: string, value: string, days: number) {
-  try { setCookieValue(key, value, days); } catch {}
-  try { localStorage.setItem(key, value); } catch {}
+  try {
+    setCookieValue(key, value, days);
+  } catch {}
+  try {
+    localStorage.setItem(key, value);
+  } catch {}
 }
 
 function loadAuth(key: string): string | null {
@@ -36,13 +40,19 @@ function loadAuth(key: string): string | null {
     const v = getCookieValue(key);
     if (v) return v;
   } catch {}
-  try { return localStorage.getItem(key); } catch {}
+  try {
+    return localStorage.getItem(key);
+  } catch {}
   return null;
 }
 
 function clearAuth(key: string) {
-  try { deleteCookieValue(key); } catch {}
-  try { localStorage.removeItem(key); } catch {}
+  try {
+    deleteCookieValue(key);
+  } catch {}
+  try {
+    localStorage.removeItem(key);
+  } catch {}
 }
 
 const ALLOWED_DOMAIN = "keitsz.edu.hk";
@@ -68,7 +78,7 @@ function parseJwt(token: string): any {
       atob(base64)
         .split("")
         .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-        .join("")
+        .join(""),
     );
     return JSON.parse(json);
   } catch {
@@ -126,7 +136,7 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
     const hd = payload.hd || (payload.email || "").split("@")[1];
     if (hd !== ALLOWED_DOMAIN) {
       setError(
-        `此網站只開放給 @${ALLOWED_DOMAIN} 帳號使用。\n你登入的是：${payload.email || "(未知)"}`
+        `此網站只開放給 @${ALLOWED_DOMAIN} 帳號使用。\n你登入的是：${payload.email || "(未知)"}`,
       );
       return;
     }
@@ -194,62 +204,14 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
   if (auth) {
     return (
       <>
-        <div
-          style={{
-            position: "fixed",
-            top: 10,
-            right: 12,
-            zIndex: 9999,
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            background: "rgba(255,255,255,.92)",
-            backdropFilter: "blur(8px)",
-            border: "1px solid #e5e7eb",
-            borderRadius: 9999,
-            padding: "4px 10px 4px 4px",
-            boxShadow: "0 2px 6px rgba(0,0,0,.08)",
-            fontSize: 12,
-          }}
-        >
+        <div className="account-bar">
           {auth.picture ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={auth.picture}
-              alt=""
-              referrerPolicy="no-referrer"
-              style={{ width: 26, height: 26, borderRadius: "50%" }}
-            />
+            <img src={auth.picture} alt="" referrerPolicy="no-referrer" />
           ) : (
-            <div
-              style={{
-                width: 26,
-                height: 26,
-                borderRadius: "50%",
-                background: "#4f46e5",
-                color: "#fff",
-                display: "grid",
-                placeItems: "center",
-                fontWeight: 700,
-              }}
-            >
-              {auth.name.charAt(0)}
-            </div>
+            <span className="account-avatar">{auth.name.charAt(0)}</span>
           )}
-          <span style={{ color: "#374151", fontWeight: 500 }}>{auth.email}</span>
-          <button
-            onClick={signOut}
-            style={{
-              border: "none",
-              background: "transparent",
-              color: "#6b7280",
-              cursor: "pointer",
-              fontSize: 12,
-              padding: "2px 6px",
-              borderRadius: 6,
-            }}
-            title="登出"
-          >
+          <span>{auth.email}</span>
+          <button onClick={signOut} title="登出">
             登出
           </button>
         </div>
@@ -283,22 +245,17 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
           textAlign: "center",
         }}
       >
-        <div
+        <img
+          src="/logo.png"
+          alt="基慈小學校徽"
+          width={64}
+          height={75}
           style={{
-            width: 64,
-            height: 64,
-            margin: "0 auto 14px",
-            borderRadius: 18,
-            background: "linear-gradient(135deg,#4f46e5,#7c3aed)",
-            display: "grid",
-            placeItems: "center",
-            color: "#fff",
-            fontSize: 28,
-            boxShadow: "0 10px 24px -8px rgba(99,102,241,.55)",
+            display: "block",
+            objectFit: "contain",
+            margin: "0 auto 18px",
           }}
-        >
-          📅
-        </div>
+        />
         <h1
           style={{
             fontSize: 22,
@@ -311,8 +268,7 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
         </h1>
         <p style={{ color: "#475569", marginBottom: 4 }}>智慧校曆</p>
         <p style={{ color: "#94a3b8", fontSize: 13, marginBottom: 22 }}>
-          請使用 <b style={{ color: "#4f46e5" }}>@{ALLOWED_DOMAIN}</b>{" "}
-          帳號登入
+          請使用 <b style={{ color: "#4f46e5" }}>@{ALLOWED_DOMAIN}</b> 帳號登入
         </p>
 
         {!clientId ? (
@@ -329,7 +285,8 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
           >
             ⚠️ 尚未設定 <code>NEXT_PUBLIC_GOOGLE_CLIENT_ID</code>。
             <br />
-            請在 Vercel/Cloudflare 環境變數加入 Google OAuth Client ID 並重新部署。
+            請在 Vercel/Cloudflare 環境變數加入 Google OAuth Client ID
+            並重新部署。
           </div>
         ) : (
           <div style={{ display: "flex", justifyContent: "center" }}>
