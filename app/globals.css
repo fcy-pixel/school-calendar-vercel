@@ -48,7 +48,6 @@ button:disabled {
 }
 button:focus-visible,
 a:focus-visible,
-summary:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
@@ -300,50 +299,31 @@ fieldset {
   margin-left: auto;
 }
 .period-reminders {
+  grid-column: 1 / -1;
+  min-width: 0;
   border-radius: 14px;
   background: var(--blue-soft);
-  margin-bottom: 22px;
 }
-.period-reminders > summary {
-  list-style: none;
+.period-header {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 14px 17px;
-  cursor: pointer;
-  min-height: 52px;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 17px;
+  color: var(--blue);
 }
-.period-reminders > summary::-webkit-details-marker {
-  display: none;
-}
-.period-label {
+.period-header h2 {
   font-weight: 700;
-  color: var(--blue);
-  font-size: 14px;
+  font-size: 18px;
+}
+.period-header > span {
+  font-size: 13px;
   white-space: nowrap;
-}
-.period-overview {
-  min-width: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  font-size: 14px;
-}
-.period-expand {
-  margin-left: auto;
-  font-size: 12px;
-  white-space: nowrap;
-  color: var(--blue);
-}
-.period-expand:after {
-  content: " ⌄";
-}
-.period-reminders[open] .period-expand:after {
-  content: " ⌃";
 }
 .period-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  align-items: start;
   gap: 12px;
   padding: 0 16px 16px;
 }
@@ -556,8 +536,6 @@ fieldset {
   background: #f0f5fd;
 }
 .day-agenda {
-  position: sticky;
-  top: 20px;
   border-left: 1px solid var(--line);
   padding-left: 24px;
   min-width: 0;
@@ -603,7 +581,7 @@ fieldset {
   padding: 18px 0;
   border-bottom: 1px solid var(--line);
 }
-.event-card:first-child {
+.agenda-items > .event-card:first-child {
   padding-top: 0;
 }
 .event-topline {
@@ -638,20 +616,21 @@ fieldset {
   margin-top: 6px;
 }
 .event-description {
-  margin-top: 9px;
+  margin: 12px 0 8px;
   font-size: 13px;
+  line-height: 1.75;
   color: var(--muted);
 }
-.event-description summary {
-  cursor: pointer;
-  min-height: 30px;
-  padding: 3px 0;
+.event-description-label {
+  display: block;
+  margin-bottom: 3px;
+  font-size: 12px;
+  font-weight: 600;
   color: var(--blue);
 }
 .event-description p {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-  padding: 8px 0;
 }
 .empty-state {
   padding: 28px 14px;
@@ -1031,9 +1010,11 @@ fieldset {
 .is-display .event-card {
   padding: 20px 0;
 }
-.is-display .period-label,
-.is-display .period-overview {
-  font-size: 18px;
+.is-display .period-header h2 {
+  font-size: 24px;
+}
+.is-display .event-description {
+  font-size: 16px;
 }
 .is-display .school-brand h1 {
   font-size: 30px;
@@ -1157,24 +1138,11 @@ fieldset {
   .display-button {
     display: none;
   }
-  .period-reminders {
-    margin-bottom: 16px;
+  .period-header {
+    padding: 16px 13px;
   }
-  .period-reminders > summary {
-    padding: 11px 13px;
-    gap: 9px;
-    flex-wrap: wrap;
-  }
-  .period-label {
-    font-size: 13px;
-  }
-  .period-overview {
-    font-size: 13px;
-    order: 3;
-    width: 100%;
-  }
-  .period-expand {
-    font-size: 12px;
+  .period-header h2 {
+    font-size: 17px;
   }
   .period-list {
     grid-template-columns: 1fr;
@@ -1229,7 +1197,7 @@ fieldset {
   .agenda-count {
     margin-bottom: 12px;
   }
-  .event-card:first-child {
+  .agenda-items > .event-card:first-child {
     padding-top: 17px;
   }
   .event-card:last-child {
@@ -1241,7 +1209,6 @@ fieldset {
   .event-card {
     padding: 17px 0;
   }
-  .event-description summary,
   .text-button {
     min-height: 44px;
     display: flex;

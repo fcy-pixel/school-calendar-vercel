@@ -636,11 +636,11 @@ export default function CalendarApp({ demo = false }: { demo?: boolean }) {
         {event.end?.includes("T") && (
           <p className="event-meta">結束時間 {event.end.slice(11, 16)}</p>
         )}
-        {event.description && (
-          <details className="event-description">
-            <summary>查看備註</summary>
+        {event.description?.trim() && (
+          <div className="event-description">
+            <span className="event-description-label">備註</span>
             <p>{event.description}</p>
-          </details>
+          </div>
         )}
         {!displayMode && (
           <button
@@ -770,21 +770,6 @@ export default function CalendarApp({ demo = false }: { demo?: boolean }) {
                   大字展示
                 </button>
               </div>
-            )}
-            {periodEvents.length > 0 && (
-              <details className="period-reminders">
-                <summary>
-                  <span className="period-label">本週及持續提醒</span>
-                  <span className="period-overview">
-                    {periodEvents[0].title.replace(/^【[^】]+】/, "")}
-                    {periodEvents.length > 1
-                      ? " 等 " + periodEvents.length + " 項"
-                      : ""}
-                  </span>
-                  <span className="period-expand">展開查看</span>
-                </summary>
-                <div className="period-list">{periodEvents.map(eventCard)}</div>
-              </details>
             )}
             <div className="workspace">
               <section
@@ -1048,13 +1033,27 @@ export default function CalendarApp({ demo = false }: { demo?: boolean }) {
                       </h3>
                       <p>
                         {periodEvents.length
-                          ? "持續事項可在上方提醒查看。"
+                          ? "本週及持續提醒已列於下方。"
                           : "點選其他日期，或新增一項安排。"}
                       </p>
                     </div>
                   )}
                 </div>
               </aside>
+              {periodEvents.length > 0 && (
+                <section
+                  className="period-reminders"
+                  aria-labelledby="period-reminders-title"
+                >
+                  <header className="period-header">
+                    <h2 id="period-reminders-title">本週及持續提醒</h2>
+                    <span>{periodEvents.length} 項</span>
+                  </header>
+                  <div className="period-list">
+                    {periodEvents.map(eventCard)}
+                  </div>
+                </section>
+              )}
             </div>
           </>
         )}
