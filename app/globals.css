@@ -1,3 +1,11 @@
+@font-face {
+  font-family: "Huninn Brand";
+  src: url("/fonts/huninn-brand.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
 :root {
   color-scheme: only light;
   --ink: #19334f;
@@ -120,13 +128,18 @@ fieldset {
   flex: none;
 }
 .school-brand h1 {
-  font-size: 25px;
-  letter-spacing: 0.03em;
-  font-weight: 750;
+  font-family: "Huninn Brand", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  font-size: 27px;
+  letter-spacing: 0.09em;
+  font-weight: 700;
   line-height: 1.35;
+  color: var(--blue);
+  white-space: nowrap;
 }
 .school-brand p {
+  font-family: "Huninn Brand", "PingFang TC", "Microsoft JhengHei", sans-serif;
   font-size: 13px;
+  letter-spacing: 0.035em;
   color: var(--muted);
   margin-top: 4px;
 }

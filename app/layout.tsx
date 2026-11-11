@@ -15,6 +15,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang="zh-Hant">
+      <head>
+        <link
+          rel="preload"
+          href="/fonts/huninn-brand.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+      </head>
       <body>
         {process.env.NODE_ENV === "development" &&
         process.env.CALENDAR_UI_PREVIEW === "1" ? (
